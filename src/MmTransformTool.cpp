@@ -31,6 +31,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace Ogre;
 
+//New shared ptr API introduced in 1.10.1
+#if OGRE_VERSION >= 0x10A01
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
+#define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#else
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
+#define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#endif
+
 namespace meshmagick
 {
 #if OGRE_VERSION_MINOR >= 11 // Ogre 1.11+
@@ -523,7 +534,7 @@ using AffineTransformationType = Ogre::Matrix4;
             else if (it->first == "xalign")
             {
                 //ignore, if no mesh given. Without we can't do this op.
-                if (mesh.isNull())
+                if (OGRE_ISNULL(mesh))
                 {
                     print("Skipped alignment, operation can't be applied to skeletons", V_HIGH);
                     continue;
@@ -552,7 +563,7 @@ using AffineTransformationType = Ogre::Matrix4;
             else if (it->first == "yalign")
             {
                 //ignore, if no mesh given. Without we can't do this op.
-                if (mesh.isNull())
+                if (OGRE_ISNULL(mesh))
                 {
                     print("Skipped alignment, operation can't be applied to skeletons", V_HIGH);
                     continue;
@@ -581,7 +592,7 @@ using AffineTransformationType = Ogre::Matrix4;
             else if (it->first == "zalign")
             {
                 //ignore, if no mesh given. Without we can't do this op.
-                if (mesh.isNull())
+                if (OGRE_ISNULL(mesh))
                 {
                     print("Skipped alignment, operation can't be applied to skeletons", V_HIGH);
                     continue;
@@ -612,7 +623,7 @@ using AffineTransformationType = Ogre::Matrix4;
             else if (it->first == "resize")
             {
                 //ignore, if no mesh given. Without we can't do this op.
-                if (mesh.isNull())
+                if (OGRE_ISNULL(mesh))
                 {
                     print("Skipped resize, operation can't be applied to skeletons", V_HIGH);
                     continue;

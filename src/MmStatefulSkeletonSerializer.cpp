@@ -30,6 +30,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace Ogre;
 
+//New shared ptr API introduced in 1.10.1
+#if OGRE_VERSION >= 0x10A01
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
+#define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#else
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
+#define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#endif
+
 namespace meshmagick
 {
     const unsigned short HEADER_CHUNK_ID = 0x1000;
@@ -38,7 +49,7 @@ namespace meshmagick
     {
         // Resource already created upon mesh loading?
         mSkeleton = SkeletonManager::getSingleton().getByName(name);
-        if (mSkeleton.isNull())
+        if (OGRE_ISNULL(mSkeleton))
         {
             // Nope. We create it here then.
             mSkeleton = SkeletonManager::getSingleton().create(name, 
@@ -67,7 +78,7 @@ namespace meshmagick
 
     void StatefulSkeletonSerializer::saveSkeleton(const String& name, bool keepEndianess)
     {
-        if (mSkeleton.isNull())
+        if (OGRE_ISNULL(mSkeleton))
         {
             throw std::logic_error("No skeleton to save set.");
         }
@@ -78,7 +89,7 @@ namespace meshmagick
 
     void StatefulSkeletonSerializer::clear()
     {
-        mSkeleton.setNull();
+        OGRE_RESET(mSkeleton);
     }
 
     SkeletonPtr StatefulSkeletonSerializer::getSkeleton() const

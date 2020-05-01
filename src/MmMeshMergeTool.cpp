@@ -31,6 +31,17 @@
 
 using namespace Ogre;
 
+//New shared ptr API introduced in 1.10.1
+#if OGRE_VERSION >= 0x10A01
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
+#define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#else
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
+#define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#endif
+
 namespace meshmagick
 {
 	MeshMergeTool::MeshMergeTool()
@@ -41,7 +52,7 @@ namespace meshmagick
 	MeshMergeTool::~MeshMergeTool()
 	{
 		mMeshes.clear();
-		mBaseSkeleton.setNull();
+		OGRE_RESET(mBaseSkeleton);
 	}
 
     Ogre::String MeshMergeTool::getName() const
@@ -71,10 +82,10 @@ namespace meshmagick
 			it != inFileNames.end(); ++it)
 		{
 			MeshPtr curMesh = meshSer->loadMesh(*it);
-			if (!curMesh.isNull())
+			if (!OGRE_ISNULL(curMesh))
 			{
-				if (curMesh->hasSkeleton() && SkeletonManager::getSingleton().getByName(
-					curMesh->getSkeletonName()).isNull())
+				if (curMesh->hasSkeleton() &&
+					OGRE_ISNULL(SkeletonManager::getSingleton().getByName(curMesh->getSkeletonName())))
 				{
 					skelSer->loadSkeleton(curMesh->getSkeletonName());
 				}
@@ -93,24 +104,24 @@ namespace meshmagick
 	void MeshMergeTool::addMesh(Ogre::MeshPtr mesh)
 	{
 		SkeletonPtr meshSkel = mesh->getSkeleton();
-		if (meshSkel.isNull() && mesh->hasSkeleton())
+		if (OGRE_ISNULL(meshSkel) && mesh->hasSkeleton())
 		{
 			meshSkel = SkeletonManager::getSingleton().getByName(mesh->getSkeletonName());
 		}
 
-		if (meshSkel.isNull() && !mBaseSkeleton.isNull())
+		if (OGRE_ISNULL(meshSkel) && !OGRE_ISNULL(mBaseSkeleton))
 		{
 			throw std::logic_error(
 					"Some meshes have a skeleton, but others have none, cannot merge.");
 		}
 
-		if (!meshSkel.isNull() && mBaseSkeleton.isNull() && !mMeshes.empty())
+		if (!OGRE_ISNULL(meshSkel) && OGRE_ISNULL(mBaseSkeleton) && !mMeshes.empty())
 		{
 			throw std::logic_error(
 					"Some meshes have a skeleton, but others have none, cannot merge.");
 		}
 
-		if (!meshSkel.isNull() && mBaseSkeleton.isNull() && mMeshes.empty())
+		if (!OGRE_ISNULL(meshSkel) && OGRE_ISNULL(mBaseSkeleton) && mMeshes.empty())
 		{
 			mBaseSkeleton = meshSkel;
 			print("Set: base skeleton (" + mBaseSkeleton->getName()+")", V_HIGH);
@@ -144,7 +155,7 @@ namespace meshmagick
 
 		MeshPtr mp = MeshManager::getSingleton().createManual(name, resourceGroupName);
 
-		if (!mBaseSkeleton.isNull())
+		if (!OGRE_ISNULL(mBaseSkeleton))
 		{
 			mp->setSkeletonName(mBaseSkeleton->getName());
 		}
@@ -182,7 +193,7 @@ namespace meshmagick
 				{
 					newsub->vertexData = sub->vertexData->clone();
 
-					if (!mBaseSkeleton.isNull())
+					if (!OGRE_ISNULL(mBaseSkeleton))
 					{
 						// build bone assignments
 						SubMesh::BoneAssignmentIterator bit = sub->getBoneAssignmentIterator();
@@ -273,7 +284,7 @@ namespace meshmagick
 					mp->sharedVertexData = (*it)->sharedVertexData->clone();
 				}
 
-				if (!mBaseSkeleton.isNull())
+				if (!OGRE_ISNULL(mBaseSkeleton))
 				{
 					Mesh::BoneAssignmentIterator bit = (*it)->getBoneAssignmentIterator();
 					while (bit.hasMoreElements())

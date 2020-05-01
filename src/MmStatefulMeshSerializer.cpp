@@ -30,6 +30,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace Ogre;
 
+//New shared ptr API introduced in 1.10.1
+#if OGRE_VERSION >= 0x10A01
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
+#define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#else
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
+#define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#endif
+
 namespace meshmagick
 {
     const unsigned short HEADER_CHUNK_ID = 0x1000;
@@ -61,7 +72,7 @@ namespace meshmagick
 
     void StatefulMeshSerializer::saveMesh(const Ogre::String& name, bool keepEndianess)
     {
-        if (mMesh.isNull())
+        if (OGRE_ISNULL(mMesh))
         {
             throw std::logic_error("No mesh to save set.");
         }
@@ -72,7 +83,7 @@ namespace meshmagick
 
     void StatefulMeshSerializer::clear()
     {
-        mMesh.setNull();
+        OGRE_RESET(mMesh);
         mMeshFileEndian = ENDIAN_NATIVE;
         mMeshFileVersion = "";
     }

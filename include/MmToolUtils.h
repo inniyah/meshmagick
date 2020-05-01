@@ -30,10 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #	include <Ogre/OgreVector4.h>
 #else
 #	include <OgreAxisAlignedBox.h>
-#	include <OgreMatrix3.h>
-#	include <OgreMatrix4.h>
-#	include <OgreVector3.h>
-#	include <OgreVector4.h>
+#	include <Ogre.h>
 #endif
 
 
