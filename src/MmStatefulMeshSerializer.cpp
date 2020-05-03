@@ -35,10 +35,12 @@ using namespace Ogre;
 #define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
 #define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
 #define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).get())
 #else
 #define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
 #define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
 #define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).getPointer())
 #endif
 
 namespace meshmagick
@@ -63,7 +65,7 @@ namespace meshmagick
 
         determineFileFormat(stream);
 
-        importMesh(stream, mMesh.getPointer());
+        importMesh(stream, OGRE_GETPOINTER(mMesh));
 
         ifs.close();
 
@@ -78,7 +80,7 @@ namespace meshmagick
         }
 
         Endian endianMode = keepEndianess ? mMeshFileEndian : ENDIAN_NATIVE;
-        exportMesh(mMesh.getPointer(), name, endianMode);
+        exportMesh(OGRE_GETPOINTER(mMesh), name, endianMode);
     }
 
     void StatefulMeshSerializer::clear()

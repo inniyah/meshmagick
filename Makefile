@@ -10,7 +10,7 @@ PKGCONFIG= pkg-config
 PACKAGES= OGRE
 
 CFLAGS= \
-	-Wall \
+	-Wall -Wno-unused-but-set-variable \
 	-fstack-protector-strong \
 	-Wall \
 	-Wformat \

@@ -260,7 +260,7 @@ using AffineTransformationType = Ogre::Matrix4;
             processVertexData(mesh->sharedVertexData);
         }
 
-        for(int i = 0;i < mesh->getNumSubMeshes();i++)
+        for(size_t i = 0;i < mesh->getNumSubMeshes();i++)
         {
             SubMesh* submesh = mesh->getSubMesh(i);
             if (submesh->vertexData != NULL)

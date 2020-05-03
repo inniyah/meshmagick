@@ -34,6 +34,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace Ogre;
 
+//New shared ptr API introduced in 1.10.1
+#if OGRE_VERSION >= 0x10A01
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
+#define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).get())
+#else
+#define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
+#define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
+#define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).getPointer())
+#endif
+
 namespace meshmagick
 {
 	RenameTool::RenameTool()
@@ -125,7 +138,7 @@ namespace meshmagick
 			else if (it->first == "animation")
 			{
 				StringPair names = split(any_cast<String>(it->second));
-				EditableSkeleton* eskel = dynamic_cast<EditableSkeleton*>(skeleton.getPointer());
+				EditableSkeleton* eskel = dynamic_cast<EditableSkeleton*>(OGRE_GETPOINTER(skeleton));
 				Animation* anim = eskel->getAnimation(names.first);
 				eskel->removeAnimation(names.first);
 				Animation* newAnim = anim->clone(names.second);
@@ -199,7 +212,7 @@ namespace meshmagick
 
                 Mesh::SubMeshNameMap smnn = mesh->getSubMeshNameMap();
                 Mesh::SubMeshNameMap::iterator it = smnn.find(before);
-                EditableMesh* pMesh = dynamic_cast<EditableMesh*>(mesh.getPointer());
+                EditableMesh* pMesh = dynamic_cast<EditableMesh*>(OGRE_GETPOINTER(mesh));
                 pMesh->renameSubmesh(before, after);
             }
 		}
