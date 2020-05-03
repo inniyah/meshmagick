@@ -274,9 +274,9 @@ using AffineTransformationType = Ogre::Matrix4;
         }
 
         // Process poses, if there are any
-        for (unsigned short i = 0; i < mesh->getPoseCount(); ++i)
+        for (unsigned short i = 0; i < mesh->getPoseList().size(); ++i)
         {
-            processPose(mesh->getPose(i));
+            processPose(mesh->getPoseList()[i]);
         }
 
         // If there are vertex animations, process these too.

@@ -35,10 +35,12 @@ using namespace Ogre;
 #define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
 #define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
 #define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).get())
 #else
 #define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
 #define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
 #define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).getPointer())
 #endif
 
 namespace meshmagick
@@ -56,7 +58,7 @@ namespace meshmagick
                 ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
         }
 
-		mSkeleton = SkeletonPtr(new EditableSkeleton(*mSkeleton.getPointer()));
+        mSkeleton = SkeletonPtr(new EditableSkeleton(*OGRE_GETPOINTER(mSkeleton)));
 
         std::ifstream ifs;
         ifs.open(name.c_str(), std::ios_base::in | std::ios_base::binary);
@@ -69,7 +71,7 @@ namespace meshmagick
 
         determineFileFormat(stream);
 
-        importSkeleton(stream, mSkeleton.getPointer());
+        importSkeleton(stream, OGRE_GETPOINTER(mSkeleton));
 
         ifs.close();
 
@@ -84,7 +86,7 @@ namespace meshmagick
         }
 
         Endian endianMode = keepEndianess ? mSkeletonFileEndian : ENDIAN_NATIVE;
-        exportSkeleton(mSkeleton.getPointer(), name, SKELETON_VERSION_LATEST, endianMode);
+        exportSkeleton(OGRE_GETPOINTER(mSkeleton), name, SKELETON_VERSION_LATEST, endianMode);
     }
 
     void StatefulSkeletonSerializer::clear()
