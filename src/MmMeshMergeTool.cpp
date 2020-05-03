@@ -36,10 +36,12 @@ using namespace Ogre;
 #define OGRE_RESET(_sharedPtr) ((_sharedPtr).reset())
 #define OGRE_ISNULL(_sharedPtr) (!(_sharedPtr))
 #define OGRE_STATIC_CAST(_resourcePtr, _castTo) (Ogre::static_pointer_cast<_castTo>(_resourcePtr))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).get())
 #else
 #define OGRE_RESET(_sharedPtr) ((_sharedPtr).setNull())
 #define OGRE_ISNULL(_sharedPtr) ((_sharedPtr).isNull())
 #define OGRE_STATIC_CAST(_resourcePtr, _castTo) ((_resourcePtr).staticCast<Ogre::Material>(_castTo))
+#define OGRE_GETPOINTER(_sharedPtr) ((_sharedPtr).getPointer())
 #endif
 
 namespace meshmagick
@@ -97,7 +99,7 @@ namespace meshmagick
 			}
 		}
 		Ogre::String outputfile = *outFileNames.begin();
-		meshSer->exportMesh(merge(outputfile).getPointer(), outputfile);
+		meshSer->exportMesh(OGRE_GETPOINTER(merge(outputfile)), outputfile);
 	}
 
 
@@ -196,10 +198,11 @@ namespace meshmagick
 					if (!OGRE_ISNULL(mBaseSkeleton))
 					{
 						// build bone assignments
-						SubMesh::BoneAssignmentIterator bit = sub->getBoneAssignmentIterator();
-						while (bit.hasMoreElements())
+						const SubMesh::VertexBoneAssignmentList & ba_list = sub->getBoneAssignments();
+						for (SubMesh::VertexBoneAssignmentList::const_iterator it = ba_list.begin(),
+							it_end = ba_list.end(); it != it_end; ++it)
 						{
-							VertexBoneAssignment vba = bit.getNext();
+							VertexBoneAssignment vba = it->second;
 							newsub->addBoneAssignment(vba);
 						}
 					}
@@ -286,10 +289,12 @@ namespace meshmagick
 
 				if (!OGRE_ISNULL(mBaseSkeleton))
 				{
-					Mesh::BoneAssignmentIterator bit = (*it)->getBoneAssignmentIterator();
-					while (bit.hasMoreElements())
+
+					const Mesh::VertexBoneAssignmentList & ba_list = (*it)->getBoneAssignments();
+					for (Mesh::VertexBoneAssignmentList::const_iterator it = ba_list.begin(),
+						it_end = ba_list.end(); it != it_end; ++it)
 					{
-						VertexBoneAssignment vba = bit.getNext();
+						VertexBoneAssignment vba = it->second;
 						mp->addBoneAssignment(vba);
 					}
 				}
